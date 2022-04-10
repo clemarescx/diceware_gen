@@ -1,4 +1,4 @@
-# diceware_gen
+# Diceware Gen
 
 A CLI password generator based on the [Diceware](https://theworld.com/~reinhold/diceware.html) word list.
 
@@ -9,4 +9,4 @@ Enter the number of words to generate when prompted and press enter.
 ## Information
 
 Uses the [rand](https://crates.io/crates/rand) crate to simulate the dice rolls used to pick words from the list.
-No idea what that could mean regarding security, so assume it's not cryptographically safe.
+According to the crate's documentation, `thread_rng()` provides a cryptographically secure RNG.
