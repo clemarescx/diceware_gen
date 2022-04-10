@@ -10,7 +10,7 @@ fn main() {
     let diceware_list =
         File::open("diceware.txt").expect("file 'diceware.txt' should be in root dir");
     let reader = BufReader::new(diceware_list);
-    let words: HashMap<u32, String> = reader
+    let diceware_words: HashMap<u32, String> = reader
         .lines()
         .map(|l| {
             l.expect("all lines are readable")
@@ -26,7 +26,7 @@ fn main() {
         .collect();
 
     let word_count = loop {
-        print!("number of words in password: ");
+        print!("number of words in password (255 max): ");
         std::io::stdout()
             .flush()
             .expect("stdout should be flushable");
@@ -42,28 +42,25 @@ fn main() {
         }
     };
     let mut rng = thread_rng();
-    let mut pw = Vec::with_capacity(word_count as usize);
+    let mut password_words = Vec::with_capacity(word_count as usize);
     for _ in 0..word_count {
-        let mut k = 0;
-        for _ in 0..5 {
-            k *= 10;
-            k += rng.gen_range(1..=6);
-        }
-        let w = words
-            .get(&k)
-            .unwrap_or_else(|| panic!("no word for key {k}"));
-        pw.push(w.clone());
+        let die_rolls = (0..5).fold(0, |acc, _| (acc * 10) + rng.gen_range(1..=6));
+        let word = diceware_words
+            .get(&die_rolls)
+            .unwrap_or_else(|| panic!("no word for key {die_rolls}"));
+        password_words.push(word.clone());
     }
-    let charset_count = words
+    let charset_count = diceware_words
         .values()
         .flat_map(|w| w.chars())
+        .chain([' '])
         .collect::<HashSet<_>>()
         .len() as f64;
 
-    let pw_string = pw.join(" ");
+    let pw_string = password_words.join(" ");
     let pw_char_count = pw_string.len() as i32;
     let lowercase_bit_entropy = charset_count.powi(pw_char_count).log2();
-    let diceware_word_count = words.len();
+    let diceware_word_count = diceware_words.len();
     let diceware_bit_entropy = (diceware_word_count as f64).powi(word_count as i32).log2();
 
     println!("password: ");
